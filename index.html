@@ -1,0 +1,1366 @@
+<!doctype html>
+<html lang="ko" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=1440" />
+    <title>Pulse — 데모/검증용 마커 통합 시안</title>
+    <style>
+      /* ============================================================
+         Pulse Theme Tokens
+         ============================================================ */
+      :root,
+      [data-theme='light'] {
+        --color-primary: #7c3aed;
+        --color-primary-hover: #6d28d9;
+        --color-primary-light: #a78bfa;
+        --color-primary-lighter: #c4b5fd;
+        --color-primary-lightest: #f5f3ff;
+        --color-primary-dark: #5b21b6;
+        --color-primary-gradient: linear-gradient(135deg, #7c3aed, #db2777);
+        --color-primary-subtle: rgba(124, 58, 237, 0.06);
+
+        --color-neutral: #64748b;
+        --color-neutral-light: #94a3b8;
+        --color-neutral-lighter: #cbd5e1;
+        --color-neutral-lightest: #f1f5f9;
+
+        --color-accent: #d97706;
+        --color-accent-light: #fbbf24;
+        --color-accent-lighter: #fde68a;
+        --color-accent-lightest: #fffbeb;
+
+        --text-primary: #0f172a;
+        --text-secondary: #475569;
+        --text-muted: #94a3b8;
+        --text-inverse: #f8fafc;
+
+        --surface-page: #f5f6fa;
+        --surface-card: #ffffff;
+        --surface-inner: #f8f9fd;
+
+        --surface-sidebar: #1e1e38;
+        --surface-sidebar-active: rgba(168, 85, 247, 0.1);
+        --sidebar-text: #a0a8c0;
+        --sidebar-text-active: #e9d5ff;
+        --sidebar-hover-bg: rgba(255, 255, 255, 0.06);
+        --sidebar-border: rgba(255, 255, 255, 0.06);
+
+        --border-color: #e2e8f0;
+        --border-subtle: #f1f5f9;
+
+        --tag-deploying-bg: #fffbeb;
+        --tag-deploying-border: #fde68a;
+        --tag-deploying-text: #d97706;
+
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+        --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.02), 0 6px 24px rgba(0, 0, 0, 0.04);
+        --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.02), 0 12px 40px rgba(0, 0, 0, 0.06);
+
+        --radius-sm: 6px;
+        --radius-md: 10px;
+        --radius-lg: 14px;
+
+        --spacing-xs: 4px;
+        --spacing-sm: 8px;
+        --spacing-md: 16px;
+        --spacing-lg: 24px;
+        --spacing-xl: 32px;
+      }
+
+      [data-theme='dark'] {
+        --color-primary: #a78bfa;
+        --color-primary-hover: #8b5cf6;
+        --color-primary-lightest: rgba(167, 139, 250, 0.1);
+        --color-accent: #fbbf24;
+        --color-accent-light: #fcd34d;
+        --color-accent-lighter: rgba(251, 191, 36, 0.25);
+        --color-accent-lightest: rgba(251, 191, 36, 0.08);
+        --text-primary: #f8fafc;
+        --text-secondary: #cbd5e1;
+        --text-muted: #64748b;
+        --surface-page: #0b0b14;
+        --surface-card: #14142b;
+        --surface-inner: #1a1a33;
+        --border-color: #2a2a44;
+        --border-subtle: #1f1f38;
+        --tag-deploying-bg: rgba(251, 191, 36, 0.08);
+        --tag-deploying-border: rgba(251, 191, 36, 0.3);
+        --tag-deploying-text: #fbbf24;
+      }
+
+      /* ============================================================
+         Base
+         ============================================================ */
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family:
+          'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont,
+          'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+        background: var(--surface-page);
+        color: var(--text-primary);
+        font-size: 14px;
+        line-height: 1.5;
+        min-width: 1400px;
+      }
+
+      .page {
+        max-width: 1720px;
+        margin: 0 auto;
+        padding: 40px 32px 80px;
+      }
+
+      .page-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        margin-bottom: 28px;
+      }
+      .page-header h1 {
+        margin: 0 0 6px;
+        font-size: 30px;
+        font-weight: 700;
+        letter-spacing: -0.4px;
+      }
+      .page-header p {
+        margin: 0;
+        color: var(--text-muted);
+        font-size: 14px;
+      }
+      .theme-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 14px;
+        background: var(--surface-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        font-size: 13px;
+        color: var(--text-secondary);
+        cursor: pointer;
+        box-shadow: var(--shadow-sm);
+      }
+      .theme-toggle:hover {
+        border-color: var(--color-primary);
+      }
+
+      /* Section header */
+      .section-heading {
+        margin: 40px 0 20px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid var(--border-color);
+        display: flex;
+        align-items: baseline;
+        gap: 14px;
+      }
+      .section-heading h2 {
+        font-size: 22px;
+        font-weight: 700;
+        margin: 0;
+        letter-spacing: -0.3px;
+      }
+      .section-heading .section-num {
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 2px;
+        color: var(--color-primary);
+        text-transform: uppercase;
+        background: var(--color-primary-lightest);
+        padding: 4px 10px;
+        border-radius: 6px;
+      }
+      .section-heading .section-desc {
+        color: var(--text-muted);
+        font-size: 13px;
+        margin-left: auto;
+      }
+
+      .intro {
+        background: var(--surface-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 18px 22px;
+        margin-bottom: 32px;
+        box-shadow: var(--shadow-sm);
+        font-size: 13px;
+        color: var(--text-secondary);
+        line-height: 1.6;
+      }
+      .intro b {
+        color: var(--text-primary);
+      }
+      .intro code {
+        background: var(--color-primary-lightest);
+        padding: 1px 6px;
+        border-radius: 4px;
+        font-size: 12px;
+        color: var(--color-primary);
+      }
+
+      /* ============================================================
+         Section 1 — Sidebar Variants (A, B, E, F)
+         ============================================================ */
+      .sidebar-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+      }
+      .sb-cell {
+        background: var(--surface-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+      }
+      .sb-cell-head {
+        padding: 14px 18px 12px;
+        border-bottom: 1px solid var(--border-subtle);
+      }
+      .sb-cell-title {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        margin-bottom: 4px;
+      }
+      .sb-cell-title h3 {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 700;
+      }
+      .sb-cell-tag {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        color: var(--text-muted);
+      }
+      .sb-cell-desc {
+        font-size: 11.5px;
+        color: var(--text-secondary);
+        margin: 0;
+        line-height: 1.5;
+      }
+      .sb-cell-body {
+        padding: 18px;
+        background: var(--surface-page);
+        display: flex;
+        justify-content: center;
+      }
+
+      /* Sidebar shell */
+      .sidebar {
+        width: 230px;
+        height: 520px;
+        background-color: var(--surface-sidebar);
+        border-right: 1px solid var(--sidebar-border);
+        border-radius: var(--radius-md);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      .sb-logo {
+        height: 52px;
+        display: flex;
+        align-items: center;
+        padding: 0 18px;
+        border-bottom: 1px solid var(--sidebar-border);
+        color: #fff;
+        font-weight: 800;
+        letter-spacing: 3px;
+        font-size: 13px;
+      }
+      .sb-logo .red-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #ff5d5d;
+        display: inline-block;
+        margin-left: 6px;
+      }
+      .sb-menu {
+        flex: 1;
+        padding: 6px 0;
+        overflow-y: auto;
+        scrollbar-width: none;
+      }
+      .sb-menu::-webkit-scrollbar {
+        display: none;
+      }
+
+      .mi {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        height: 38px;
+        padding: 0 18px;
+        font-size: 12.5px;
+        font-weight: 500;
+        color: var(--sidebar-text);
+        cursor: pointer;
+      }
+      .mi:hover {
+        background: var(--sidebar-hover-bg);
+        color: #e2e8f0;
+      }
+      .mi.active {
+        color: var(--sidebar-text-active);
+        font-weight: 600;
+        background: var(--surface-sidebar-active);
+      }
+      .mi-icon {
+        width: 16px;
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        opacity: 0.85;
+      }
+      .mi-text {
+        flex: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .sm-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        height: 38px;
+        padding: 0 18px;
+        font-size: 12.5px;
+        color: var(--sidebar-text);
+        cursor: pointer;
+        position: relative;
+      }
+      .sm-title::after {
+        content: '▾';
+        margin-left: auto;
+        font-size: 9px;
+        opacity: 0.5;
+      }
+      .sm-items .mi {
+        height: 32px;
+        padding-left: 46px;
+        font-size: 12px;
+      }
+
+      .sb-foot {
+        padding: 10px 12px;
+        border-top: 1px solid var(--sidebar-border);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .sb-avatar {
+        width: 26px;
+        height: 26px;
+        border-radius: 7px;
+        background: var(--color-primary-gradient);
+        color: #fff;
+        font-size: 10px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .sb-name {
+        font-size: 12px;
+        font-weight: 600;
+        color: #e2e8f0;
+      }
+      .sb-role {
+        font-size: 10px;
+        color: var(--sidebar-text);
+      }
+
+      /* --- Sidebar A: Inline DEMO chip --- */
+      .sbA .chip-demo {
+        margin-left: auto;
+        padding: 2px 7px;
+        border-radius: 4px;
+        background: rgba(217, 119, 6, 0.18);
+        color: var(--color-accent-light);
+        font-size: 9.5px;
+        font-weight: 700;
+        letter-spacing: 0.6px;
+        border: 1px solid rgba(251, 191, 36, 0.3);
+      }
+      .sbA .sm-title .chip-demo-parent {
+        margin-left: auto;
+        margin-right: 18px;
+        padding: 2px 6px;
+        font-size: 9px;
+        background: rgba(217, 119, 6, 0.15);
+        color: var(--color-accent-light);
+        border-radius: 3px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+      }
+
+      /* --- Sidebar B: Section grouped --- */
+      .sbB .section-label {
+        padding: 12px 18px 6px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        color: var(--color-accent-light);
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .sbB .section-label.neutral {
+        color: var(--sidebar-text);
+      }
+      .sbB .section-label::before {
+        content: '';
+        width: 8px;
+        height: 1px;
+        background: currentColor;
+        opacity: 0.5;
+      }
+      .sbB .section-label::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: currentColor;
+        opacity: 0.2;
+      }
+      .sbB .demo-section {
+        background: rgba(217, 119, 6, 0.04);
+        border-top: 1px solid rgba(217, 119, 6, 0.12);
+        border-bottom: 1px solid rgba(217, 119, 6, 0.12);
+        padding-bottom: 4px;
+      }
+
+      /* --- Sidebar E: Dot indicator --- */
+      .sbE .mi.is-demo .mi-icon,
+      .sbE .sm-title.is-demo .mi-icon {
+        position: relative;
+      }
+      .sbE .mi.is-demo .mi-icon::after,
+      .sbE .sm-title.is-demo .mi-icon::after {
+        content: '';
+        position: absolute;
+        top: -2px;
+        right: -3px;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--color-accent-light);
+        box-shadow: 0 0 0 2px var(--surface-sidebar);
+      }
+      .sbE .sm-items .mi.is-demo::before {
+        content: '';
+        position: absolute;
+        left: 34px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: var(--color-accent-light);
+      }
+      .sbE .legend {
+        padding: 8px 18px;
+        font-size: 10px;
+        color: var(--sidebar-text);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        border-top: 1px solid var(--sidebar-border);
+      }
+      .sbE .legend-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--color-accent-light);
+      }
+
+      /* --- Sidebar F: Wrapped box --- */
+      .sbF .demo-box {
+        margin: 12px 10px 4px;
+        padding: 6px 0 4px;
+        background: linear-gradient(
+          180deg,
+          rgba(217, 119, 6, 0.14) 0%,
+          rgba(217, 119, 6, 0.05) 100%
+        );
+        border: 1px solid rgba(217, 119, 6, 0.28);
+        border-radius: 8px;
+      }
+      .sbF .demo-box-head {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 2px 12px 6px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        color: var(--color-accent-light);
+        text-transform: uppercase;
+      }
+      .sbF .demo-box-head::before {
+        content: '●';
+        font-size: 8px;
+      }
+      .sbF .demo-box .mi {
+        padding-left: 18px;
+      }
+
+      /* ============================================================
+         Section 2 — UI Marker Variants (A, D, E, G)
+         ============================================================ */
+      .marker-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+      }
+      .mk-cell {
+        background: var(--surface-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 22px;
+        box-shadow: var(--shadow-sm);
+      }
+      .mk-cell-head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        margin-bottom: 6px;
+      }
+      .mk-cell-head h3 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 700;
+      }
+      .mk-cell-tag {
+        font-size: 10.5px;
+        font-weight: 700;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        color: var(--text-muted);
+      }
+      .mk-cell-desc {
+        color: var(--text-secondary);
+        font-size: 13px;
+        margin: 0 0 16px;
+      }
+
+      /* Shared mock swap UI */
+      .swap-mock {
+        background: var(--surface-inner);
+        border-radius: var(--radius-md);
+        padding: 18px;
+      }
+      .swap-row {
+        background: var(--surface-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 12px 14px;
+        margin-bottom: 6px;
+      }
+      .swap-row-label {
+        font-size: 10.5px;
+        color: var(--text-muted);
+        margin-bottom: 5px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+      }
+      .swap-row-main {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .swap-amount {
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: -0.3px;
+      }
+      .swap-token {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 5px 10px;
+        background: var(--surface-inner);
+        border: 1px solid var(--border-color);
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 12.5px;
+      }
+      .swap-token-dot {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--color-primary-gradient);
+      }
+      .swap-arrow {
+        width: 28px;
+        height: 28px;
+        margin: -2px auto;
+        position: relative;
+        z-index: 1;
+        border-radius: 50%;
+        background: var(--surface-card);
+        border: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-muted);
+        font-size: 13px;
+      }
+      .swap-cta {
+        margin-top: 12px;
+        display: block;
+        width: 100%;
+        padding: 11px;
+        border: 0;
+        border-radius: var(--radius-md);
+        background: var(--color-primary);
+        color: #fff;
+        font-size: 13.5px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .swap-cta:hover {
+        background: var(--color-primary-hover);
+      }
+
+      /* --- Marker A: Corner Ribbon (was "Corner Ribbon" in feature markers) --- */
+      .mkA {
+        position: relative;
+      }
+      .mkA .swap-mock {
+        position: relative;
+        border: 2px dashed var(--color-accent);
+        background: var(--color-accent-lightest);
+        overflow: hidden;
+      }
+      .mkA .ribbon {
+        position: absolute;
+        top: 12px;
+        right: -38px;
+        transform: rotate(35deg);
+        background: var(--color-accent);
+        color: #fff;
+        padding: 4px 46px;
+        font-size: 10.5px;
+        font-weight: 800;
+        letter-spacing: 2px;
+        z-index: 2;
+        box-shadow: var(--shadow-sm);
+      }
+      .mkA .tape {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background-image: repeating-linear-gradient(
+          45deg,
+          transparent 0 18px,
+          rgba(217, 119, 6, 0.06) 18px 32px
+        );
+        border-radius: var(--radius-md);
+      }
+
+      /* --- Marker D: Left Accent + Floating Chip --- */
+      .mkD .swap-mock {
+        position: relative;
+        border-left: 4px solid var(--color-accent);
+        padding-left: 16px;
+      }
+      .mkD .chip {
+        position: absolute;
+        top: -10px;
+        right: 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--surface-card);
+        border: 1px solid var(--color-accent-lighter);
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 10.5px;
+        font-weight: 700;
+        color: var(--color-accent);
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        box-shadow: var(--shadow-sm);
+      }
+      .mkD .chip-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--color-accent);
+        box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.2);
+      }
+
+      /* --- Marker E: Info Banner --- */
+      .mkE .banner {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        padding: 12px 14px;
+        background: linear-gradient(
+          135deg,
+          rgba(217, 119, 6, 0.1),
+          rgba(217, 119, 6, 0.03)
+        );
+        border: 1px solid var(--color-accent-lighter);
+        border-radius: var(--radius-md);
+        margin-bottom: 12px;
+      }
+      .mkE .banner-icon {
+        width: 32px;
+        height: 32px;
+        flex-shrink: 0;
+        border-radius: var(--radius-sm);
+        background: var(--color-accent);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        font-weight: 800;
+      }
+      .mkE .banner-body {
+        flex: 1;
+      }
+      .mkE .banner-title {
+        font-weight: 700;
+        font-size: 13px;
+        color: var(--tag-deploying-text);
+        margin: 0 0 2px;
+      }
+      .mkE .banner-desc {
+        font-size: 11.5px;
+        color: var(--text-secondary);
+        margin: 0;
+      }
+      .mkE .banner-link {
+        font-size: 11.5px;
+        font-weight: 600;
+        color: var(--color-accent);
+        text-decoration: none;
+        flex-shrink: 0;
+        align-self: center;
+        padding: 5px 9px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--color-accent-lighter);
+        background: var(--surface-card);
+      }
+      .mkE .banner-link:hover {
+        background: var(--color-accent-lightest);
+      }
+
+      /* --- Marker G: Glow Border + Pulse --- */
+      .mkG .glow-wrap {
+        position: relative;
+        padding: 2px;
+        border-radius: var(--radius-md);
+        background: linear-gradient(
+          135deg,
+          var(--color-accent) 0%,
+          var(--color-primary) 60%,
+          var(--color-accent) 100%
+        );
+        background-size: 200% 200%;
+        animation: shimmer 4s ease-in-out infinite;
+      }
+      @keyframes shimmer {
+        0%,
+        100% {
+          background-position: 0% 0%;
+        }
+        50% {
+          background-position: 100% 100%;
+        }
+      }
+      .mkG .swap-mock {
+        background: var(--surface-card);
+        border-radius: calc(var(--radius-md) - 2px);
+        border: 0;
+      }
+      .mkG .pulse-label {
+        position: absolute;
+        top: -11px;
+        left: 16px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 11px;
+        background: var(--surface-card);
+        border: 1px solid var(--color-accent-lighter);
+        border-radius: 999px;
+        font-size: 10.5px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        color: var(--color-accent);
+        box-shadow: var(--shadow-sm);
+        z-index: 2;
+      }
+      .mkG .pulse-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--color-accent);
+        position: relative;
+      }
+      .mkG .pulse-dot::after {
+        content: '';
+        position: absolute;
+        inset: -2px;
+        border-radius: 50%;
+        background: var(--color-accent);
+        opacity: 0.4;
+        animation: pulse 1.6s ease-out infinite;
+      }
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+          opacity: 0.5;
+        }
+        100% {
+          transform: scale(2.8);
+          opacity: 0;
+        }
+      }
+
+      /* ============================================================
+         Summary
+         ============================================================ */
+      .summary {
+        margin-top: 48px;
+        background: var(--surface-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        box-shadow: var(--shadow-sm);
+      }
+      .summary h2 {
+        margin: 0 0 14px;
+        font-size: 18px;
+      }
+      .summary h3 {
+        margin: 20px 0 10px;
+        font-size: 14px;
+      }
+      .summary table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+      }
+      .summary th,
+      .summary td {
+        text-align: left;
+        padding: 9px 12px;
+        border-bottom: 1px solid var(--border-subtle);
+        vertical-align: top;
+      }
+      .summary th {
+        color: var(--text-muted);
+        font-weight: 600;
+        font-size: 11.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        background: var(--surface-inner);
+      }
+      .pill {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+        background: var(--tag-deploying-bg);
+        color: var(--tag-deploying-text);
+        border: 1px solid var(--tag-deploying-border);
+      }
+      .pill.strong {
+        background: #fef2f2;
+        color: #dc2626;
+        border-color: #fecaca;
+      }
+      .pill.soft {
+        background: var(--color-primary-lightest);
+        color: var(--color-primary);
+        border-color: #ddd6fe;
+      }
+      .recommend {
+        margin-top: 20px;
+        padding: 16px 18px;
+        background: linear-gradient(135deg, var(--color-primary-lightest), var(--color-accent-lightest));
+        border: 1px solid var(--color-primary-lighter);
+        border-radius: var(--radius-md);
+      }
+      .recommend h3 {
+        margin: 0 0 8px;
+        font-size: 14px;
+        color: var(--color-primary-dark);
+      }
+      .recommend p {
+        margin: 0;
+        font-size: 13px;
+        color: var(--text-secondary);
+        line-height: 1.7;
+      }
+      .recommend code {
+        background: var(--surface-card);
+        padding: 1px 6px;
+        border-radius: 4px;
+        font-size: 12px;
+        color: var(--color-primary);
+        border: 1px solid var(--border-color);
+      }
+
+      footer {
+        margin-top: 32px;
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="page-header">
+        <div>
+          <h1>데모/검증용 마커 통합 시안</h1>
+          <p>사이드바 4종 · 화면 내 UI 마커 4종 · 두 레이어 조합 또는 단일 선택 모두 검토 가능</p>
+        </div>
+        <button class="theme-toggle" id="themeToggle">🌓 테마 전환</button>
+      </div>
+
+      <div class="intro">
+        <b>검토용 시안입니다. 두 레이어를 모두 적용해도 되고, 한쪽만 선택해도 됩니다.</b><br />
+        · <b>Layer 1 — 사이드바</b>: 진입 전부터 "이 메뉴는 실거래가 아님"을 인지시키는 방식. 4개 시안
+        (<code>A, B, E, F</code>).<br />
+        · <b>Layer 2 — 화면 내 UI 마커</b>: 실제 기능 카드 영역을 시각적으로 감싸 조작 직전에
+        다시 한 번 드러내는 방식. 4개 시안 (<code>A, D, E, G</code>).<br />
+        두 레이어를 조합하면 이중 방어가 되고, 한쪽만 골라도 단일 신호로 충분할 수 있습니다.
+        어느 방향이 Pulse의 톤과 가장 잘 맞을지 검토 부탁드립니다. 모든 시안은 기존 테마 토큰
+        (Primary <code>#7c3aed</code>, Accent <code>#d97706</code>)만 사용.
+      </div>
+
+      <!-- ============================================================
+           Section 1 — Sidebar
+           ============================================================ -->
+      <div class="section-heading">
+        <span class="section-num">Layer 1</span>
+        <h2>사이드바 메뉴 구분</h2>
+        <span class="section-desc">진입점에서 데모 메뉴를 구분</span>
+      </div>
+
+      <div class="sidebar-grid">
+        <!-- Sidebar A -->
+        <div class="sb-cell">
+          <div class="sb-cell-head">
+            <div class="sb-cell-title"><h3>A. Inline DEMO 칩</h3><span class="sb-cell-tag">가벼움</span></div>
+            <p class="sb-cell-desc">메뉴명 끝에 작은 앰버 칩. 레이아웃 변경 없음.</p>
+          </div>
+          <div class="sb-cell-body">
+            <div class="sidebar sbA">
+              <div class="sb-logo">PULSE<span class="red-dot"></span></div>
+              <div class="sb-menu">
+                <div class="mi"><span class="mi-icon">⚪</span><span class="mi-text">대시보드</span></div>
+                <div class="mi"><span class="mi-icon">◯</span><span class="mi-text">상품관리</span></div>
+                <div class="mi"><span class="mi-icon">◉</span><span class="mi-text">KYC관리</span></div>
+                <div>
+                  <div class="sm-title"><span class="mi-icon">▦</span><span class="mi-text">거래/자산</span><span class="chip-demo-parent">DEMO</span></div>
+                  <div class="sm-items">
+                    <div class="mi"><span class="mi-text">거래/자산 관리</span><span class="chip-demo">DEMO</span></div>
+                    <div class="mi"><span class="mi-text">잔고 조회</span></div>
+                    <div class="mi active"><span class="mi-text">스왑</span><span class="chip-demo">DEMO</span></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="sm-title"><span class="mi-icon">▣</span><span class="mi-text">KSD 관리</span></div>
+                  <div class="sm-items">
+                    <div class="mi"><span class="mi-text">조회</span></div>
+                    <div class="mi"><span class="mi-text">참여기관 관리</span></div>
+                    <div class="mi"><span class="mi-text">KSD 운영</span><span class="chip-demo">DEMO</span></div>
+                  </div>
+                </div>
+                <div class="mi"><span class="mi-icon">🔍</span><span class="mi-text">탐색기</span></div>
+                <div class="mi"><span class="mi-icon">⚙</span><span class="mi-text">회원관리</span></div>
+              </div>
+              <div class="sb-foot">
+                <div class="sb-avatar">BC</div>
+                <div><div class="sb-name">BCG Capital</div><div class="sb-role">관리자</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar B -->
+        <div class="sb-cell">
+          <div class="sb-cell-head">
+            <div class="sb-cell-title"><h3>B. 섹션 분리</h3><span class="sb-cell-tag">구조적</span></div>
+            <p class="sb-cell-desc">"실거래 / 시연" 섹션 라벨 + 앰버 틴트 배경으로 그룹핑.</p>
+          </div>
+          <div class="sb-cell-body">
+            <div class="sidebar sbB">
+              <div class="sb-logo">PULSE<span class="red-dot"></span></div>
+              <div class="sb-menu">
+                <div class="section-label neutral">실거래</div>
+                <div class="mi"><span class="mi-icon">⚪</span><span class="mi-text">대시보드</span></div>
+                <div class="mi"><span class="mi-icon">◯</span><span class="mi-text">상품관리</span></div>
+                <div class="mi"><span class="mi-icon">◉</span><span class="mi-text">KYC관리</span></div>
+                <div class="mi"><span class="mi-icon">▤</span><span class="mi-text">잔고 조회</span></div>
+                <div>
+                  <div class="sm-title"><span class="mi-icon">▣</span><span class="mi-text">KSD 관리</span></div>
+                </div>
+                <div class="mi"><span class="mi-icon">🔍</span><span class="mi-text">탐색기</span></div>
+                <div class="mi"><span class="mi-icon">⚙</span><span class="mi-text">회원관리</span></div>
+
+                <div class="demo-section">
+                  <div class="section-label">시연 · 검증용</div>
+                  <div class="mi"><span class="mi-icon">▦</span><span class="mi-text">거래/자산 관리</span></div>
+                  <div class="mi active"><span class="mi-icon">⇄</span><span class="mi-text">스왑</span></div>
+                  <div class="mi"><span class="mi-icon">⚙</span><span class="mi-text">KSD 운영</span></div>
+                </div>
+              </div>
+              <div class="sb-foot">
+                <div class="sb-avatar">BC</div>
+                <div><div class="sb-name">BCG Capital</div><div class="sb-role">관리자</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar E -->
+        <div class="sb-cell">
+          <div class="sb-cell-head">
+            <div class="sb-cell-title"><h3>E. Dot Indicator</h3><span class="sb-cell-tag">절제됨</span></div>
+            <p class="sb-cell-desc">아이콘 우상단 작은 앰버 점 (알림 뱃지 느낌) + 하단 범례.</p>
+          </div>
+          <div class="sb-cell-body">
+            <div class="sidebar sbE">
+              <div class="sb-logo">PULSE<span class="red-dot"></span></div>
+              <div class="sb-menu">
+                <div class="mi"><span class="mi-icon">⚪</span><span class="mi-text">대시보드</span></div>
+                <div class="mi"><span class="mi-icon">◯</span><span class="mi-text">상품관리</span></div>
+                <div class="mi"><span class="mi-icon">◉</span><span class="mi-text">KYC관리</span></div>
+                <div>
+                  <div class="sm-title is-demo"><span class="mi-icon">▦</span><span class="mi-text">거래/자산</span></div>
+                  <div class="sm-items">
+                    <div class="mi is-demo"><span class="mi-text">거래/자산 관리</span></div>
+                    <div class="mi"><span class="mi-text">잔고 조회</span></div>
+                    <div class="mi active is-demo"><span class="mi-text">스왑</span></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="sm-title"><span class="mi-icon">▣</span><span class="mi-text">KSD 관리</span></div>
+                  <div class="sm-items">
+                    <div class="mi"><span class="mi-text">조회</span></div>
+                    <div class="mi"><span class="mi-text">참여기관 관리</span></div>
+                    <div class="mi is-demo"><span class="mi-text">KSD 운영</span></div>
+                  </div>
+                </div>
+                <div class="mi"><span class="mi-icon">🔍</span><span class="mi-text">탐색기</span></div>
+                <div class="mi"><span class="mi-icon">⚙</span><span class="mi-text">회원관리</span></div>
+              </div>
+              <div class="legend"><span class="legend-dot"></span>검증/데모 메뉴 표시</div>
+              <div class="sb-foot">
+                <div class="sb-avatar">BC</div>
+                <div><div class="sb-name">BCG Capital</div><div class="sb-role">관리자</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar F -->
+        <div class="sb-cell">
+          <div class="sb-cell-head">
+            <div class="sb-cell-title"><h3>F. Wrapped Box</h3><span class="sb-cell-tag">경계 뚜렷</span></div>
+            <p class="sb-cell-desc">"DEMO · SANDBOX" 박스로 격리. 가장 명확한 시각적 경계.</p>
+          </div>
+          <div class="sb-cell-body">
+            <div class="sidebar sbF">
+              <div class="sb-logo">PULSE<span class="red-dot"></span></div>
+              <div class="sb-menu">
+                <div class="mi"><span class="mi-icon">⚪</span><span class="mi-text">대시보드</span></div>
+                <div class="mi"><span class="mi-icon">◯</span><span class="mi-text">상품관리</span></div>
+                <div class="mi"><span class="mi-icon">◉</span><span class="mi-text">KYC관리</span></div>
+                <div class="mi"><span class="mi-icon">▤</span><span class="mi-text">잔고 조회</span></div>
+                <div>
+                  <div class="sm-title"><span class="mi-icon">▣</span><span class="mi-text">KSD 관리</span></div>
+                </div>
+                <div class="mi"><span class="mi-icon">🔍</span><span class="mi-text">탐색기</span></div>
+                <div class="mi"><span class="mi-icon">⚙</span><span class="mi-text">회원관리</span></div>
+
+                <div class="demo-box">
+                  <div class="demo-box-head">DEMO · SANDBOX</div>
+                  <div class="mi"><span class="mi-icon">▦</span><span class="mi-text">거래/자산 관리</span></div>
+                  <div class="mi active"><span class="mi-icon">⇄</span><span class="mi-text">스왑</span></div>
+                  <div class="mi"><span class="mi-icon">⚙</span><span class="mi-text">KSD 운영</span></div>
+                </div>
+              </div>
+              <div class="sb-foot">
+                <div class="sb-avatar">BC</div>
+                <div><div class="sb-name">BCG Capital</div><div class="sb-role">관리자</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================
+           Section 2 — UI Markers
+           ============================================================ -->
+      <div class="section-heading">
+        <span class="section-num">Layer 2</span>
+        <h2>화면 내 UI 마커</h2>
+        <span class="section-desc">실제 기능 카드 영역 감싸기</span>
+      </div>
+
+      <div class="marker-grid">
+        <!-- Marker A -->
+        <section class="mk-cell mkA">
+          <header class="mk-cell-head">
+            <h3>A. Corner Ribbon</h3>
+            <span class="mk-cell-tag">강한 경고</span>
+          </header>
+          <p class="mk-cell-desc">대각선 앰버 리본 + 점선 테두리 + 반복 대각선 패턴. 가장 눈에 띄며, 내부 QA에 적합.</p>
+          <div class="swap-mock">
+            <div class="ribbon">DEMO</div>
+            <div class="tape"></div>
+            <div class="swap-row">
+              <div class="swap-row-label">From</div>
+              <div class="swap-row-main">
+                <div class="swap-amount">1,000,000</div>
+                <div class="swap-token"><span class="swap-token-dot"></span>ST-BOND-001</div>
+              </div>
+            </div>
+            <div class="swap-arrow">↓</div>
+            <div class="swap-row">
+              <div class="swap-row-label">To</div>
+              <div class="swap-row-main">
+                <div class="swap-amount">50</div>
+                <div class="swap-token"><span class="swap-token-dot"></span>DT-KRW</div>
+              </div>
+            </div>
+            <button class="swap-cta">스왑 실행</button>
+          </div>
+        </section>
+
+        <!-- Marker D -->
+        <section class="mk-cell mkD">
+          <header class="mk-cell-head">
+            <h3>D. Left Accent + Floating Chip</h3>
+            <span class="mk-cell-tag">미니멀</span>
+          </header>
+          <p class="mk-cell-desc">좌측 4px 앰버 스트라이프 + 우상단 떠 있는 "DEMO" 칩. 여러 카드가 나열될 때 유리.</p>
+          <div class="swap-mock">
+            <span class="chip"><span class="chip-dot"></span>DEMO</span>
+            <div class="swap-row">
+              <div class="swap-row-label">From</div>
+              <div class="swap-row-main">
+                <div class="swap-amount">1,000,000</div>
+                <div class="swap-token"><span class="swap-token-dot"></span>ST-BOND-001</div>
+              </div>
+            </div>
+            <div class="swap-arrow">↓</div>
+            <div class="swap-row">
+              <div class="swap-row-label">To</div>
+              <div class="swap-row-main">
+                <div class="swap-amount">50</div>
+                <div class="swap-token"><span class="swap-token-dot"></span>DT-KRW</div>
+              </div>
+            </div>
+            <button class="swap-cta">스왑 실행</button>
+          </div>
+        </section>
+
+        <!-- Marker E -->
+        <section class="mk-cell mkE">
+          <header class="mk-cell-head">
+            <h3>E. Info Banner</h3>
+            <span class="mk-cell-tag">맥락 제공</span>
+          </header>
+          <p class="mk-cell-desc">아이콘 + 제목 + 설명 + 액션 링크. 외부 파트너 시연 때 "왜 이 화면이 데모인지" 근거 제공.</p>
+          <div>
+            <div class="banner">
+              <div class="banner-icon">ⓘ</div>
+              <div class="banner-body">
+                <div class="banner-title">이 기능은 검증 환경입니다</div>
+                <div class="banner-desc">
+                  체인 상태는 실제 운영 네트워크와 분리되어 있습니다. 생성된 트랜잭션은 온체인에
+                  기록되지 않습니다.
+                </div>
+              </div>
+              <a class="banner-link" href="#">자세히 →</a>
+            </div>
+            <div class="swap-mock">
+              <div class="swap-row">
+                <div class="swap-row-label">From</div>
+                <div class="swap-row-main">
+                  <div class="swap-amount">1,000,000</div>
+                  <div class="swap-token"><span class="swap-token-dot"></span>ST-BOND-001</div>
+                </div>
+              </div>
+              <div class="swap-arrow">↓</div>
+              <div class="swap-row">
+                <div class="swap-row-label">To</div>
+                <div class="swap-row-main">
+                  <div class="swap-amount">50</div>
+                  <div class="swap-token"><span class="swap-token-dot"></span>DT-KRW</div>
+                </div>
+              </div>
+              <button class="swap-cta">스왑 실행</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Marker G -->
+        <section class="mk-cell mkG">
+          <header class="mk-cell-head">
+            <h3>G. Glow Border + Pulse</h3>
+            <span class="mk-cell-tag">Web3 감성</span>
+          </header>
+          <p class="mk-cell-desc">그라디언트 외곽선 + 펄스 애니메이션. 박람회·CES·투자자 데모 등 전시형 시연에 적합.</p>
+          <div class="glow-wrap">
+            <span class="pulse-label"><span class="pulse-dot"></span>LIVE DEMO</span>
+            <div class="swap-mock">
+              <div class="swap-row">
+                <div class="swap-row-label">From</div>
+                <div class="swap-row-main">
+                  <div class="swap-amount">1,000,000</div>
+                  <div class="swap-token"><span class="swap-token-dot"></span>ST-BOND-001</div>
+                </div>
+              </div>
+              <div class="swap-arrow">↓</div>
+              <div class="swap-row">
+                <div class="swap-row-label">To</div>
+                <div class="swap-row-main">
+                  <div class="swap-amount">50</div>
+                  <div class="swap-token"><span class="swap-token-dot"></span>DT-KRW</div>
+                </div>
+              </div>
+              <button class="swap-cta">스왑 실행</button>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ============================================================
+           Summary
+           ============================================================ -->
+      <section class="summary">
+        <h2>비교표</h2>
+
+        <h3>Layer 1 · 사이드바</h3>
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 50px">#</th>
+              <th style="width: 180px">시안</th>
+              <th style="width: 120px">인지 강도</th>
+              <th>특성 · 고려할 점</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>A</b></td>
+              <td>Inline DEMO 칩</td>
+              <td><span class="pill soft">중간</span></td>
+              <td>기존 메뉴 순서 그대로. 레이아웃 변형이 적어 가장 보수적. 칩이 작아 스캔 시 놓칠 여지는 있음</td>
+            </tr>
+            <tr>
+              <td><b>B</b></td>
+              <td>섹션 분리</td>
+              <td><span class="pill">높음</span></td>
+              <td>운영/데모 그룹을 명확히 분리. 메뉴 IA가 바뀌므로 기존 사용자 멘탈 모델에 영향</td>
+            </tr>
+            <tr>
+              <td><b>E</b></td>
+              <td>Dot Indicator</td>
+              <td><span class="pill soft">낮음</span></td>
+              <td>가장 절제된 표현. 브랜드 톤은 유지되지만 스크린샷·외부 공유 시 묻힐 가능성</td>
+            </tr>
+            <tr>
+              <td><b>F</b></td>
+              <td>Wrapped Box</td>
+              <td><span class="pill strong">매우 높음</span></td>
+              <td>데모 메뉴를 격리된 박스로. 시각적 경계가 가장 뚜렷하나 사이드바 공간을 제법 차지</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Layer 2 · 화면 내 UI 마커</h3>
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 50px">#</th>
+              <th style="width: 220px">시안</th>
+              <th style="width: 120px">인지 강도</th>
+              <th>특성 · 고려할 점</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>A</b></td>
+              <td>Corner Ribbon</td>
+              <td><span class="pill strong">매우 강함</span></td>
+              <td>점선 테두리 + 대각선 리본. 경고성이 가장 강하지만 시각적 노이즈도 큰 편</td>
+            </tr>
+            <tr>
+              <td><b>D</b></td>
+              <td>Left Accent + Chip</td>
+              <td><span class="pill soft">중간</span></td>
+              <td>Element Plus 컴포넌트와 가장 자연스럽게 어울림. 여러 카드가 같은 페이지에 있어도 덜 산만</td>
+            </tr>
+            <tr>
+              <td><b>E</b></td>
+              <td>Info Banner</td>
+              <td><span class="pill">중~강</span></td>
+              <td>맥락 설명 + 링크 제공 가능. 세로 공간을 제법 차지하므로 페이지 밀도 고려</td>
+            </tr>
+            <tr>
+              <td><b>G</b></td>
+              <td>Glow Border + Pulse</td>
+              <td><span class="pill">중~강</span></td>
+              <td>애니메이션 외곽선. 시각적으로 돋보이지만 반복 노출 시 피로감 있을 수 있음</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="recommend">
+          <h3>검토 가이드</h3>
+          <p>
+            <b>두 레이어 모두 적용</b>할 수도, <b>한쪽만 선택</b>할 수도 있습니다. 정답은 없고,
+            Pulse의 톤과 사용자가 기능을 만나는 맥락에 따라 달라집니다. 아래는 선택에 도움이 될 질문들입니다.<br /><br />
+            · <b>사이드바만으로 충분한가?</b> — 사용자가 메뉴에서 데모를 인지하고 진입한다면, 화면 내에는
+            별도 마커 없이 깨끗하게 유지할 수 있습니다. 기능 화면의 복잡도를 낮추고 싶다면 이 방향.<br />
+            · <b>화면 마커만으로 충분한가?</b> — 사이드바를 건드리지 않고도 "이 기능은 데모"를 표현하고
+            싶다면, 화면 내 레이어만으로도 기능 단위에서 경고가 가능합니다. 공통 사이드바를 유지해야
+            할 때 유리.<br />
+            · <b>둘 다 필요한가?</b> — 실거래와 데모가 동일한 UI 패턴을 공유하고, 실수 리스크가 크다면
+            진입점(사이드바) + 실행 직전(화면)에서 이중 신호가 안전합니다.<br /><br />
+            <b>강도 조합 예시</b>:<br />
+            · 조용하게 — 사이드바 <code>A 또는 E</code> · 화면 <code>D</code><br />
+            · 중간 — 사이드바 <code>B</code> · 화면 <code>E</code><br />
+            · 강하게 — 사이드바 <code>F</code> · 화면 <code>A 또는 G</code>
+          </p>
+        </div>
+      </section>
+
+      <footer>Pulse Design Proposal · 2026-04-21 · docs/frontend/design-proposals/demo-markers-combined.html</footer>
+    </div>
+
+    <script>
+      const btn = document.getElementById('themeToggle');
+      btn.addEventListener('click', () => {
+        const cur = document.documentElement.getAttribute('data-theme');
+        document.documentElement.setAttribute('data-theme', cur === 'light' ? 'dark' : 'light');
+      });
+    </script>
+  </body>
+</html>
